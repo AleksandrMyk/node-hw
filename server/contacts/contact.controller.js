@@ -1,8 +1,16 @@
 const Joi = require("joi");
-const contactModel = require("../schema/contactSchema");
+const contactModel = require("./contactSchema");
 const {
   Types: { ObjectId },
 } = require("mongoose");
+
+const options = {
+  page: 1,
+  limit: 4,
+  collation: {
+    subscription: "free",
+  },
+};
 
 module.exports = class ContactController {
   static async getUsers(req, res, next) {
@@ -14,11 +22,31 @@ module.exports = class ContactController {
     }
   }
 
+  static async getOptionalList(req, res, next) {
+    try {
+      const { limit, page, sub } = req.query;
+      if (limit && page) {
+        const options = { limit, page };
+        const contacts = await contactModel.paginate({}, options);
+        return res.status(200).json(contacts.docs);
+      }
+      if (sub) {
+        const query = { subscription: sub };
+        const options = { limit: 20, page: 1 };
+        const contacts = await contactModel.paginate(query, options);
+        return res.status(200).json(contacts.docs);
+      }
+      next();
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async getUserById(req, res, next) {
     try {
       const contact = await contactModel.findById(req.params.id);
       if (!contact) {
-        return res.status(404).json({ message: "Cannot find contact" });
+        return res.status(404).json({ message: "Can not find contact" });
       }
       return res.status(200).json(contact);
     } catch (err) {
@@ -39,9 +67,9 @@ module.exports = class ContactController {
     try {
       const contact = await contactModel.findByIdAndDelete(req.params.id);
       if (!contact) {
-        return res.status(404).json({ message: "Cannot find such contact" });
+        return res.status(404).json({ message: "Can not find contact" });
       }
-      return res.status(200).json({ message: "Contact is deleted" });
+      return res.status(200).json({ message: "Contact deleted" });
     } catch (err) {
       next(err);
     }
@@ -57,7 +85,7 @@ module.exports = class ContactController {
         { new: true }
       );
       if (!contact) {
-        return res.status(404).json({ message: "Cannot found this contact" });
+        return res.status(404).json({ message: "Can not found contact" });
       }
       return res.status(200).json(contact);
     } catch (err) {
@@ -99,7 +127,7 @@ module.exports = class ContactController {
 
   static async checkUserInList(req, res, next) {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({ message: "Not found :(" });
+      return res.status(404).json({ message: "Not found" });
     }
     next();
   }
