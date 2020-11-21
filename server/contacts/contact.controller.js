@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const contactModel = require("./contactSchema");
+const contactModel = require("./contact.schema");
 const {
   Types: { ObjectId },
 } = require("mongoose");
@@ -46,7 +46,7 @@ module.exports = class ContactController {
     try {
       const contact = await contactModel.findById(req.params.id);
       if (!contact) {
-        return res.status(404).json({ message: "Can not find contact" });
+        return res.status(404).json({ message: "Cannot find contact" });
       }
       return res.status(200).json(contact);
     } catch (err) {
@@ -67,7 +67,7 @@ module.exports = class ContactController {
     try {
       const contact = await contactModel.findByIdAndDelete(req.params.id);
       if (!contact) {
-        return res.status(404).json({ message: "Can not find contact" });
+        return res.status(404).json({ message: "Cannot find contact" });
       }
       return res.status(200).json({ message: "Contact deleted" });
     } catch (err) {
@@ -85,7 +85,7 @@ module.exports = class ContactController {
         { new: true }
       );
       if (!contact) {
-        return res.status(404).json({ message: "Can not found contact" });
+        return res.status(404).json({ message: "Cannot found this contact" });
       }
       return res.status(200).json(contact);
     } catch (err) {
